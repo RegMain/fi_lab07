@@ -100,7 +100,7 @@ int main() {
                         printf("%lf ", value);
                     }
                 }
-                break
+                break;
             }
             case 11: {
                 return 0;
