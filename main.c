@@ -22,15 +22,16 @@ int main() {
             case 1: {
                 q = init();
                 if (q) {
-                    printf("Queue is created successfully.\n");
+                    printf("Success!\n");
                 } else {
-                    printf("Error while creating queue.\n");
+                    printf("Error!\n");
                 }
                 break;
             }
             case 2: {
                 pair tmp;
-                scanf("Print key (char) and value (double): %c %lf", &tmp.key, &tmp.value);
+                printf("Print key (char) and value (double): ");
+                scanf(" %c %lf", &tmp.key, &tmp.value);
                 if (push(q, tmp)) {
                     printf("Error!\n");
                 } else {
@@ -79,7 +80,8 @@ int main() {
             }
             case 9: {
                 pair tmp;
-                scanf("Print key (char) and value (double): %c %lf", &tmp.key, &tmp.value);
+                printf("Print key (char) and value (double): ");
+                scanf(" %c %lf", &tmp.key, &tmp.value);
                 if (push_with_order(q, tmp, q_cmp)) {
                     printf("Error!\n");
                 } else {
@@ -89,7 +91,8 @@ int main() {
             }
             case 10: {
                 char key;
-                scanf("Print key (char): %c", &key);
+                printf("Print key (char): ");
+                scanf(" %c", &key);
                 vec_double *vec = find_by_key(q, key);
                 if (!vec) {
                     printf("Error!\n");
@@ -103,10 +106,12 @@ int main() {
                 break;
             }
             case 11: {
+                destroy(q);
                 return 0;
             }
             default: continue;
         }
     }
+    destroy(q);
     return 0;
 }

@@ -15,20 +15,36 @@ queue* init() {
     return q;
 }
 
+int destroy(queue *q) {
+    if (!q) {
+        return 1;
+    }
+    queue_node *iter = q->front;
+    while (iter) {
+        queue_node *tmp = iter;
+        iter = iter->next;
+        free(tmp);
+    }
+    free(q);
+    return 0;
+}
+
 int push(queue *q, pair value) {
     if (!q) {
         return 1;
     }
     queue_node *node = (queue_node *)malloc(sizeof(queue_node));
     node->value = value;
+    node->next = NULL;
     q->size += 1;
     if (!q->front) {
         q->front = node;
         q->back = node;
-        node->next = NULL;
         return 0;
     }
     if (!q->back) {
+        q->size -= 1;
+        free(node);
         return 2;
     }
     q->back->next = node;
@@ -193,6 +209,7 @@ vec_double *find_by_key(queue *q, char key) {
         if (iter->value.key == key) {
             vec_double_push_back(vec, iter->value.value);
         }
+        iter = iter->next;
     }
     return vec;
 }

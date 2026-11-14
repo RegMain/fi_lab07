@@ -21,6 +21,8 @@ typedef struct {
 
 queue *init();
 
+int destroy(queue *q);
+
 int push(queue *q, pair value);
 
 int pop(queue *q, pair *pop_value);
