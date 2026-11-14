@@ -59,7 +59,7 @@ int vec_double_set_size(vec_double *vec, int32_t size) {
   return 0;
 }
 
-int32_t vec_int_get_size(vec_double *vec) {
+int32_t vec_double_get_size(vec_double *vec) {
   if (!vec) {
     return 0;
   }
