@@ -4,7 +4,7 @@
 int main() {
     queue *q = NULL;
     while (1) {
-        printf("\nQUEUE DEMONSTRATION\n");
+        printf("\nКУЕУЕ DEMONSTRATION\n");
         printf("[1] Create\n");
         printf("[2] Push\n");
         printf("[3] Pop\n");
@@ -17,7 +17,13 @@ int main() {
         printf("[10] Find by key\n");
         printf("[11] Exit\n");
         int opcode;
-        scanf("%d", &opcode);
+        if (scanf("%d", &opcode) == 0) {
+            printf("\nЗаходит однажды тестировщик в бар.\nЗабегает в бар.\nПролезает в бар.\nТанцует в бар.\nКрадется в бар.\nВрывается в бар.\nПрыгает в бар\n\nПосле чего делает заказ:\n— кружку пива\n— 2 кружки пива\n— 0 кружек пива\n— 999999999 кружек пива\n— ящерицу в стакане пива\n— минус одна кружка пива\n— qwertyuip кружек пива\n\nВсе тесты окончены, бар открывается для посетителей.\nПервый же посетитель подходит к бармену и спрашивает, как пройти в туалет.\nБар охватывает пламя.\n\nВот вы, товарищ, тот самый тестировщик...\n");
+            if (q) {
+                destroy(q);
+            }
+            return 0;
+        }
         switch (opcode) {
             case 1: {
                 q = init();
@@ -50,14 +56,14 @@ int main() {
             }
             case 4: {
                 if (is_empty(q)) {
-                    printf("Queue is empty.\n");
+                    printf("Куеуе is empty.\n");
                 } else {
-                    printf("Queue is not empty.\n");
+                    printf("Куеуе is not empty.\n");
                 }
                 break;
             }
             case 5: {
-                printf("Size of queue: %d\n", get_size(q));
+                printf("Size of куеуе: %d\n", get_size(q));
                 break;
             }
             case 6: {
@@ -106,7 +112,9 @@ int main() {
                 break;
             }
             case 11: {
-                destroy(q);
+                if (q) {
+                    destroy(q);
+                }
                 return 0;
             }
             default: continue;
