@@ -1,7 +1,6 @@
 #include "vec_double.h"
 #include <stdint.h>
 #include <stdlib.h>
-#include <sys/types.h>
 
 vec_double *vec_double_init(int32_t size, double value) {
   if (size < 0) {
