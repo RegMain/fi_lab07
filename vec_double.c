@@ -4,8 +4,11 @@
 #include <sys/types.h>
 
 vec_double *vec_double_init(int32_t size, double value) {
+  if (size < 0) {
+    return NULL;
+  }
   vec_double *vec = (vec_double *)malloc(sizeof(vec_double));
-  if (!vec || size < 0) {
+  if (!vec) {
     return NULL;
   }
   vec->size = size;

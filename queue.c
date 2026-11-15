@@ -34,6 +34,9 @@ int push(queue *q, pair value) {
         return 1;
     }
     queue_node *node = (queue_node *)malloc(sizeof(queue_node));
+    if (!node) {
+        return 2;
+    }
     node->value = value;
     node->next = NULL;
     q->size += 1;
@@ -45,7 +48,7 @@ int push(queue *q, pair value) {
     if (!q->back) {
         q->size -= 1;
         free(node);
-        return 2;
+        return 3;
     }
     q->back->next = node;
     q->back = node;
@@ -53,7 +56,7 @@ int push(queue *q, pair value) {
 }
 
 int pop(queue *q, pair *pop_value) {
-    if (!q) {
+    if (!q || !pop_value) {
         return 1;
     }
     if (!q->size) {
@@ -120,7 +123,7 @@ int q_cmp(pair a, pair b) {
 }
 
 int sort(queue *q, int(*cmp)(pair a, pair b)) {
-    if (!q) {
+    if (!q || !cmp) {
         return 1;
     }
     queue_node *iter_i = q->front;
@@ -140,7 +143,7 @@ int sort(queue *q, int(*cmp)(pair a, pair b)) {
 }
 
 int is_sorted(queue *q, int(*cmp)(pair a, pair b)) {
-    if (!q || q->size < 2) {
+    if (!q || q->size < 2 || !cmp) {
         return 1;
     }
     queue_node *iter_i = q->front;
@@ -156,7 +159,7 @@ int is_sorted(queue *q, int(*cmp)(pair a, pair b)) {
 }
 
 int push_with_order(queue *q, pair value, int(*cmp)(pair a, pair b)) {
-    if (!q) {
+    if (!q || !cmp) {
         return 1;
     }
     if (!is_sorted(q, cmp)) {
@@ -169,6 +172,9 @@ int push_with_order(queue *q, pair value, int(*cmp)(pair a, pair b)) {
         return 0;
     }
     queue_node *node = (queue_node *)malloc(sizeof(queue_node));
+    if (!node) {
+        return 3;
+    }
     node->value = value;
     q->size += 1;
     while (iter) {
