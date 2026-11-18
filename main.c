@@ -29,7 +29,7 @@ int main() {
                 if (q) {
                     destroy(q);
                 }
-                q = init();
+                q = create();
                 if (q) {
                     printf("Success!\n");
                 } else {
@@ -42,7 +42,7 @@ int main() {
                 printf("Print key (char) and value (double): ");
                 if (scanf(" %c %lf", &tmp.key, &tmp.value) != 2) {
                     printf("Error!\n");
-                    break;    
+                    break;
                 }
                 if (push(q, tmp)) {
                     printf("Error!\n");

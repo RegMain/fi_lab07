@@ -19,7 +19,7 @@ typedef struct {
     uint32_t size;
 } queue;
 
-queue *init();
+queue *create();
 
 int destroy(queue *q);
 
@@ -44,3 +44,21 @@ int is_sorted(queue *q, int(*cmp)(pair a, pair b));
 int push_with_order(queue *q, pair value, int(*cmp)(pair a, pair b));
 
 vec_double *find_by_key(queue *q, char key);
+
+typedef struct {
+    queue *q;
+    queue_node *prev;
+    queue_node *el;
+} iter;
+
+int begin(queue *q, iter *it);
+
+int end(queue *q, iter *it);
+
+int is_equal(iter a, iter b);
+
+int next(iter *a);
+
+int get(iter it, pair *val);
+
+int set(iter it, pair value);

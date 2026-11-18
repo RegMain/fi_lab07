@@ -4,7 +4,72 @@
 #include <stdint.h>
 #include <stdio.h>
 
-queue* init() {
+int begin(queue *q, iter *it) {
+    if (!q || !it) {
+        return 1;
+    }
+    it->q = q;
+    it->el = q->front;
+    it->prev = NULL;
+    return 0;
+}
+
+int end(queue *q, iter *it) {
+    if (!q || !it) {
+        return 1;
+    }
+    it->q = q;
+    it->el = NULL;
+    it->prev = q->back;
+    return 0;
+}
+
+int is_equal(iter a, iter b) {
+    return (a.q == b.q && a.el == b.el);
+}
+
+int get_prev(iter a, pair *value) {
+    if (!a.prev || !value) {
+        return 1;
+    }
+    *value = a.prev->value;
+    return 0;
+}
+
+int next(iter *a) {
+    if (!a || !a->el) {
+        return 1;
+    }
+    a->prev = a->el;
+    a->el = a->el->next;
+    return 0;
+}
+
+int get(iter it, pair *value) {
+    if (!it.el || !value) {
+        return 1;
+    }
+    *value = it.el->value;
+    return 0;
+}
+
+int get_next(iter a, pair *value) {
+    next(&a);
+    if (get(a, value)) {
+        return 1;
+    }
+    return 0;
+}
+
+int set(iter it, pair value) {
+    if (!it.el) {
+        return 1;
+    }
+    it.el->value = value;
+    return 0;
+}
+
+queue* create() {
     queue *q = (queue *)malloc(sizeof(queue));
     if (!q) {
         return NULL;
@@ -19,10 +84,13 @@ int destroy(queue *q) {
     if (!q) {
         return 1;
     }
-    queue_node *iter = q->front;
-    while (iter) {
-        queue_node *tmp = iter;
-        iter = iter->next;
+    iter it;
+    iter it_end;
+    begin(q, &it);
+    end(q, &it_end);
+    while (!is_equal(it, it_end)) {
+        queue_node *tmp = it.el;
+        next(&it);
         free(tmp);
     }
     free(q);
@@ -52,6 +120,28 @@ int push(queue *q, pair value) {
     }
     q->back->next = node;
     q->back = node;
+    return 0;
+}
+
+int insert(iter it, pair value) {
+    iter it_next = it;
+    iter it_end;
+    end(it.q, &it_end);
+    if (next(&it_next)) {
+        return 1;
+    }
+    if (is_equal(it_next, it_end)) {
+        push(it.q, value);
+        return 0;
+    }
+    queue_node *node = (queue_node *)malloc(sizeof(queue_node));
+    if (!node) {
+        return 2;
+    }
+    node->value = value;
+    node->next = it_next.el;
+    it.el->next = node;
+    it.q->size++;
     return 0;
 }
 
@@ -93,11 +183,14 @@ int print_internal(queue *q) {
     if (!q) {
         return 1;
     }
-    printf("queue (adr %p): size=%d, front=%p, back=%p\n", (void *)q, q->size, (void *)q->front, (void *)q->back);
-    queue_node *iter = q->front;
-    while (iter) {
-        printf("node (adr %p): value={key=%c, value=%lf}, next=%p\n", (void *)iter, iter->value.key, iter->value.value, (void *)iter->next);
-        iter = iter->next;
+    printf("queue (adr %p): size=%u, front=%p, back=%p\n", (void *)q, q->size, (void *)q->front, (void *)q->back);
+    iter it;
+    iter it_end;
+    begin(q, &it);
+    end(q, &it_end);
+    while (!is_equal(it, it_end)) {
+        printf("node (adr %p): value={key=%c, value=%lf}, next=%p\n", (void *)it.el, it.el->value.key, it.el->value.value, (void *)it.el->next);
+        next(&it);
     }
     return 0;
 }
@@ -106,10 +199,12 @@ int print(queue *q) {
     if (!q) {
         return 1;
     }
-    queue_node *iter = q->front;
-    while (iter) {
-        printf("<%c, %lf> ", iter->value.key, iter->value.value);
-        iter = iter->next;
+    iter it, it_end;
+    begin(q, &it);
+    end(q, &it_end);
+    while (!is_equal(it, it_end)) {
+        printf("<%c, %lf> ", it.el->value.key, it.el->value.value);
+        next(&it);
     }
     printf("\n");
     return 0;
@@ -126,18 +221,21 @@ int sort(queue *q, int(*cmp)(pair a, pair b)) {
     if (!q || !cmp) {
         return 1;
     }
-    queue_node *iter_i = q->front;
-    for (uint32_t i = 0; i < get_size(q); ++i) {
-        queue_node *iter_j = iter_i->next;
-        for (uint32_t j = i + 1; j < get_size(q); ++j) {
-            if (!cmp(iter_i->value, iter_j->value)) {
-                pair tmp = iter_i->value;
-                iter_i->value = iter_j->value;
-                iter_j->value = tmp;
+    iter it_end, it_i;
+    end(q, &it_end);
+    begin(q, &it_i);
+    for (; !is_equal(it_i, it_end) ; next(&it_i)) {
+        iter it_j = it_i;
+        next(&it_j);
+        for (; !is_equal(it_j, it_end) ; next(&it_j)) {
+            pair a, b;
+            get(it_i, &a);
+            get(it_j, &b);
+            if (!cmp(a, b)) {
+                set(it_i, b);
+                set(it_j, a);
             }
-            iter_j = iter_j->next;
         }
-        iter_i = iter_i->next;
     }
     return 0;
 }
@@ -146,14 +244,20 @@ int is_sorted(queue *q, int(*cmp)(pair a, pair b)) {
     if (!q || q->size < 2 || !cmp) {
         return 1;
     }
-    queue_node *iter_i = q->front;
-    queue_node *iter_j = q->front->next;
-    while (iter_j) {
-        if (!cmp(iter_i->value, iter_j->value)) {
+    iter it_i, it_j, it_end;
+    begin(q, &it_i);
+    end(q, &it_end);
+    it_j = it_i;
+    next(&it_j);
+    while (!is_equal(it_j, it_end)) {
+        pair a, b;
+        get(it_i, &a);
+        get(it_j, &b);
+        if (!cmp(a, b)) {
             return 0;
         }
-        iter_i = iter_j;
-        iter_j = iter_j->next;
+        next(&it_i);
+        next(&it_j);
     }
     return 1;
 }
@@ -165,57 +269,73 @@ int push_with_order(queue *q, pair value, int(*cmp)(pair a, pair b)) {
     if (!is_sorted(q, cmp)) {
         return 2;
     }
-    queue_node *p_iter = NULL;
-    queue_node *iter = q->front;
-    if (!iter) {
+    iter it, it_prev, it_end, it_begin;
+    begin(q, &it);
+    it_begin = it;
+    end(q, &it_end);
+    if (is_equal(it, it_end)) {
         push(q, value);
         return 0;
     }
-    queue_node *node = (queue_node *)malloc(sizeof(queue_node));
-    if (!node) {
-        return 3;
-    }
-    node->value = value;
-    q->size += 1;
-    while (iter) {
-        if (p_iter == NULL && cmp(value, iter->value)) {
-            q->front = node;
-            node->next = iter;
+    while (!is_equal(it, it_end)) {
+        pair next_value;
+        pair prev_value;
+        pair it_value;
+        get(it, &it_value);
+        if (is_equal(it, it_begin) && cmp(value, it_value)) {
+            if (push(q, value)) {
+                return 3;
+            }
+            while (!is_equal(it, it_end)) {
+                get(it, &it_value);
+                if (is_equal(it, it_begin)) {
+                    set(it, value);
+                } else {
+                    set(it, prev_value);
+                }
+                prev_value = it_value;
+                next(&it);
+            }
             return 0;
-        } else if (p_iter == NULL) {
-            p_iter = iter;
-            iter = iter->next;
+        } else if (is_equal(it, it_begin)) {
+            it_prev = it;
+            next(&it);
             continue;
         }
-        if (cmp(iter->value, value) && iter->next == NULL) {
-            q->back = node;
-            iter->next = node;
-            node->next = NULL;
+        if (cmp(it_value, value) && !get_next(it, &next_value)) {
+            if (push(q, value)) {
+                return 3;
+            }
             return 0;
         }
-        if (cmp(p_iter->value, value) && cmp(value, iter->value)) {
-            p_iter->next = node;
-            node->next = iter;
+        if (cmp(prev_value, value) && cmp(value, it_value)) {
+            if (insert(it_prev, value)) {
+                return 4;
+            }
             return 0;
         }
-        p_iter = iter;
-        iter = iter->next;
+        it_prev = it;
+        next(&it);
     }
-    free(node);
-    return 2;
+    return 42;
 }
 
 vec_double *find_by_key(queue *q, char key) {
     if (!q) {
         return NULL;
     }
-    queue_node *iter = q->front;
+    iter it;
+    iter it_end;
+    begin(q, &it);
+    end(q, &it_end);
     vec_double *vec = vec_double_init(0, 0);
-    while (iter) {
-        if (iter->value.key == key) {
-            vec_double_push_back(vec, iter->value.value);
+    while (!is_equal(it, it_end)) {
+        pair it_value;
+        get(it, &it_value);
+        if (it_value.key == key) {
+            vec_double_push_back(vec, it_value.value);
         }
-        iter = iter->next;
+        next(&it);
     }
     return vec;
 }
